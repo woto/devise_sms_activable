@@ -52,7 +52,7 @@ module Devise
       # Send confirmation token by sms
       def send_sms_token
         if(self.phone?)
-          generate_sms_token! if self.generate_sms_token.nil?
+          generate_sms_token! if self.sms_confirmation_token.nil?
           ::Devise.sms_sender.send_sms(self.phone, I18n.t(:"devise.sms_activations.sms_body", :sms_confirmation_token => self.sms_confirmation_token, :default => self.sms_confirmation_token))
         else
           self.errors.add(:sms_confirmation_token, :no_phone_associated)
@@ -70,8 +70,8 @@ module Devise
       # is already confirmed, it should never be blocked. Otherwise we need to
       # calculate if the confirm time has not expired for this user.
 
-      def active?
-        super && !sms_confirmation_required? || confirmed_sms? || confirmation_sms_period_valid?
+      def active_for_authentication?
+        super && (!sms_confirmation_required? || confirmed_sms? || confirmation_sms_period_valid?)
       end
 
       # The message to be shown if the account is inactive.
